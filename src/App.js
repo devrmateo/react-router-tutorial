@@ -1,26 +1,64 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Redirect
+} from 'react-router-dom'
+import './App.css'
+
+const fakeAuth = {
+  isAuthenticated: false,
+  authenticate(cb) {
+    this.isAuthenticated = true
+    setTimeout(cb, 100) //fake async
+  },
+  signout(cb) {
+    this.isAuthenticated = false
+    setTimeout(cb, 100)
+  }
+}
+
+const Public = () => <h3>Public</h3>
+const Protected = () => <h3>Protected</h3>
+
+class Login extends Component {
+  render() {
+    return (
+      <div>
+        LOGIN
+      </div>
+    )
+  }
+}
+
+const PrivateRoute = ({ component: Component, ...rest }) => (
+  <Route { ...rest } render={(props) => (
+    fakeAuth.isAuthenticated === true
+    ? <Component {...props} />
+    : <Redirect to='/login' />
+  )} />
+)
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Router>
+        <div>
+          <ul>
+            <li>
+              <Link to='/public'>Public Page</Link>
+            </li>
+            <li>
+              <Link to='/protected'>Protected Page</Link>
+            </li>
+          </ul>
+
+          <Route path='/public' component={Public} />
+          <Route path='/login' component={Login} />
+          <PrivateRoute path='/protected' component={Protected} />
+        </div>
+      </Router>
     );
   }
 }
