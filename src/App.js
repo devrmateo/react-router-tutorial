@@ -3,7 +3,8 @@ import {
   BrowserRouter as Router,
   Route,
   Link,
-  Redirect
+  Redirect,
+  withRouter
 } from 'react-router-dom'
 import './App.css'
 
@@ -23,10 +24,40 @@ const Public = () => <h3>Public</h3>
 const Protected = () => <h3>Protected</h3>
 
 class Login extends Component {
+  state = {
+    redirectToReferrer: false
+  }
+
+  login = () => (
+    fakeAuth.authenticate(() => {
+      this.setState({
+        redirectToReferrer: true
+      })
+    })
+  )
+
   render() {
+
+    const { redirectToReferrer } = this.state;
+    const { referrer } = this.props.location.state || { referrer: {
+        pathname: '/'
+    }};
+
+    if (redirectToReferrer === true) {
+      return (
+        <Redirect
+            to={referrer}
+        />
+      )
+    }
     return (
       <div>
-        LOGIN
+        <button
+          onClick={this.login}
+        >
+          Log in
+        </button>
+        <p>You must log in to view the page at {referrer}.</p>
       </div>
     )
   }
@@ -36,9 +67,14 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route { ...rest } render={(props) => (
     fakeAuth.isAuthenticated === true
     ? <Component {...props} />
-    : <Redirect to='/login' />
-  )} />
-)
+    : <Redirect to={{
+        pathname: '/login',
+        state: {
+          referrer: props.location.pathname
+        }
+      }} />
+    )} />
+  )
 
 class App extends Component {
   render() {
