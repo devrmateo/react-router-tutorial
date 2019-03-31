@@ -63,6 +63,23 @@ class Login extends Component {
   }
 }
 
+const AuthButton = withRouter(({ history }) => (
+  fakeAuth.isAuthenticated
+  ? (
+      <p>
+        <button
+          onClick={() => {
+            fakeAuth.signout(() => history.push('/'))
+          }}
+        >
+          Sign out
+        </button>
+      </p>
+    )
+  :
+    <p>You are not logged in.</p>
+))
+
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route { ...rest } render={(props) => (
     fakeAuth.isAuthenticated === true
@@ -81,6 +98,7 @@ class App extends Component {
     return (
       <Router>
         <div>
+        <AuthButton />
           <ul>
             <li>
               <Link to='/public'>Public Page</Link>
